@@ -1,0 +1,123 @@
+const int luzVerde = 11;          // Pin para la luz verde
+const int luzRoja = 12;           // Pin para la luz roja
+const int luzAmarilla = 13;       // Pin para la luz amarilla
+
+bool estadoLuzVerde = false;      // Estado inicial de la luz verde (apagada)
+bool estadoLuzRoja = false;       // Estado inicial de la luz roja (apagada)
+bool estadoLuzAmarilla = false;   // Estado inicial de la luz amarilla (apagada)
+bool estadoTodasLasLuces = false; // Estado inicial para todas las luces (apagadas)
+
+void setup() {
+  // Configura los pines de las luces como salidas
+  pinMode(luzVerde, OUTPUT);
+  pinMode(luzRoja, OUTPUT);
+  pinMode(luzAmarilla, OUTPUT);
+
+  // Inicializa la comunicación serie a 9600 bps
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Verifica si hay datos disponibles en el puerto serie
+  if (Serial.available()) {
+    char opcion = Serial.read();  // Lee la opción ingresada por el usuario
+    int c = 0;                    // Variable para el número de parpadeos
+
+    // Estructura switch para manejar las diferentes opciones
+    switch (opcion) {
+      case '1':
+        alternarLuz(luzVerde, estadoLuzVerde); // Alterna la luz verde
+        break;
+      case '2':
+        alternarLuz(luzVerde, estadoLuzVerde); // Alterna la luz verde
+        break;
+      case '3':
+        alternarLuz(luzRoja, estadoLuzRoja);   // Alterna la luz roja
+        break;
+      case '4':
+        alternarLuz(luzRoja, estadoLuzRoja);   // Alterna la luz roja
+        break;
+      case '5':
+        alternarLuz(luzAmarilla, estadoLuzAmarilla); // Alterna la luz amarilla
+        break;
+      case '6':
+        alternarLuz(luzAmarilla, estadoLuzAmarilla); // Alterna la luz amarilla
+        break;
+      case '7':
+        alternarTodasLasLuces(); // Alterna el estado de todas las luces (encender/apagar)
+        break;
+      case '8':
+        alternarTodasLasLuces(); // Alterna el estado de todas las luces (encender/apagar)
+        break;
+      case '9':
+        Serial.println("Ingrese el numero de parpadeos:"); // Pide el número de parpadeos
+        while (!Serial.available()); // Espera hasta que el usuario ingrese un número
+        c = Serial.parseInt();      // Lee el número de parpadeos ingresado
+        modoIntermitente(c);        // Llama a la función de modo intermitente
+        break;
+      default:
+        Serial.println("Opción no válida. Introduzca un número del 1 al 9."); // Mensaje de error
+        break;
+    }
+  }
+}
+
+// Función para alternar el estado de una luz
+void alternarLuz(int luz, bool &estadoLuz) {
+  if (estadoLuz) {
+    apagarLuz(luz); // Si la luz está encendida, la apaga
+  } else {
+    encenderLuz(luz); // Si la luz está apagada, la enciende
+  }
+  estadoLuz = !estadoLuz; // Cambia el estado de la luz
+}
+
+// Función para encender una luz
+void encenderLuz(int luz) {
+  digitalWrite(luz, HIGH); // Envía señal alta al pin correspondiente para encender la luz
+  Serial.println("Luz encendida."); // Mensaje en el monitor serie
+}
+
+// Función para apagar una luz
+void apagarLuz(int luz) {
+  digitalWrite(luz, LOW); // Envía señal baja al pin correspondiente para apagar la luz
+  Serial.println("Luz apagada."); // Mensaje en el monitor serie
+}
+
+// Función para encender todas las luces
+void encenderTodasLasLuces() {
+  encenderLuz(luzVerde); // Enciende la luz verde
+  encenderLuz(luzRoja);  // Enciende la luz roja
+  encenderLuz(luzAmarilla); // Enciende la luz amarilla
+  estadoTodasLasLuces = true; // Actualiza el estado de todas las luces a encendidas
+  Serial.println("Todas las luces encendidas."); // Mensaje en el monitor serie
+}
+
+// Función para apagar todas las luces
+void apagarTodasLasLuces() {
+  apagarLuz(luzVerde); // Apaga la luz verde
+  apagarLuz(luzRoja);  // Apaga la luz roja
+  apagarLuz(luzAmarilla); // Apaga la luz amarilla
+  estadoTodasLasLuces = false; // Actualiza el estado de todas las luces a apagadas
+  Serial.println("Todas las luces apagadas."); // Mensaje en el monitor serie
+}
+
+// Función para alternar el estado de todas las luces
+void alternarTodasLasLuces() {
+  if (estadoTodasLasLuces) {
+    apagarTodasLasLuces(); // Si están encendidas, apágalas
+  } else {
+    encenderTodasLasLuces(); // Si están apagadas, enciéndelas
+  }
+}
+
+// Función para el modo intermitente de las luces
+void modoIntermitente(int c) {
+  for (int i = 0; i < c; i++) {  
+    encenderTodasLasLuces(); // Enciende todas las luces
+    delay(500);               // Espera 500 milisegundos
+    apagarTodasLasLuces();   // Apaga todas las luces
+    delay(500);               // Espera 500 milisegundos
+  }
+  Serial.println("Modo intermitente completado."); // Mensaje en el monitor serie
+}
